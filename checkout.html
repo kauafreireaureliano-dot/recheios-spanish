@@ -143,7 +143,8 @@ async function pagar() {
 
   var result = await stripe.confirmPayment({
     elements: elements,
-    redirect: 'if_required'
+    redirect: 'if_required',
+    confirmParams: { return_url: 'https://recheios-spanish.vercel.app/obrigado.html' }
   });
 
   if (result.error) {

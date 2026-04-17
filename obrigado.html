@@ -3,86 +3,94 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>¡Pago confirmado! — Rellenos Secretos</title>
+<title>Pago confirmado — Rellenos Secretos</title>
 <script>
-  !function(f,b,e,v,n,t,s)
-  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-  n.queue=[];t=b.createElement(e);t.async=!0;
-  t.src=v;s=b.getElementsByTagName(e)[0];
-  s.parentNode.insertBefore(t,s)}(window, document,'script',
-  'https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init', '904108975631664');
-  fbq('track', 'PageView');
-  fbq('track', 'Purchase', {
-    value: 88,
-    currency: 'MXN',
-    content_ids: ['rellenos-mx'],
-    content_type: 'product'
-  });
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}
+  (window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init','904108975631664');
+  fbq('track','PageView');
+  fbq('track','Purchase',{value:88,currency:'MXN',content_ids:['rellenos-mx'],content_type:'product'});
 </script>
 <noscript><img height="1" width="1" style="display:none"
-  src="https://www.facebook.com/tr?id=904108975631664&ev=Purchase&noscript=1"
-/></noscript>
+  src="https://www.facebook.com/tr?id=904108975631664&ev=Purchase&cd[value]=88&cd[currency]=MXN&noscript=1"/></noscript>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet"/>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Nunito', sans-serif;
-    background: linear-gradient(160deg, #fde8ee, #fff5e6);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 24px;
-  }
-  .card {
-    background: #fff;
-    border-radius: 24px;
-    padding: 48px 32px;
-    max-width: 400px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.10);
-  }
-  .icon { font-size: 64px; margin-bottom: 16px; }
-  h1 { font-size: 28px; font-weight: 900; color: #2a1a0e; margin-bottom: 8px; }
-  p { font-size: 15px; color: #7a5c45; font-weight: 600; margin-bottom: 24px; line-height: 1.6; }
-  .btn {
-    display: inline-block;
-    background: linear-gradient(135deg, #e8849a, #c9504d);
-    color: #fff;
-    font-size: 16px;
-    font-weight: 800;
-    padding: 16px 32px;
-    border-radius: 50px;
-    text-decoration: none;
-    box-shadow: 0 6px 20px rgba(200,80,77,0.35);
-  }
-  .counter { font-size: 13px; color: #b09080; margin-top: 16px; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Nunito',sans-serif;background:linear-gradient(160deg,#fde8ee,#fff5e6);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .card{background:#fff;border-radius:24px;padding:48px 32px;max-width:400px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.10);text-align:center}
+  .icon{font-size:64px;margin-bottom:16px}
+  h1{font-size:26px;font-weight:900;color:#5c3317;margin-bottom:10px}
+  .sub{font-size:14px;color:#7a5c45;font-weight:600;margin-bottom:8px;line-height:1.6}
+  .aviso{font-size:13px;color:#9a7060;background:#fff8f0;border-radius:10px;padding:12px;margin-bottom:24px;line-height:1.5}
+  .btn{display:inline-block;background:linear-gradient(135deg,#e8849a,#c9504d);color:#fff;font-size:15px;font-weight:800;padding:14px 32px;border-radius:50px;text-decoration:none;box-shadow:0 6px 20px rgba(200,80,77,0.35)}
+  .counter{font-size:12px;color:#b09080;margin-top:14px}
 </style>
 </head>
 <body>
 <div class="card">
   <div class="icon">🎉</div>
-  <h1>¡Pago confirmado!</h1>
-  <p>Gracias por tu compra.<br/>Serás redirigido a tus recetas en <span id="s">5</span> segundos.</p>
-  <a class="btn" href="https://drive.google.com/file/d/1xncYfL9BqytUgWWEpioNOHWW05jwyIX3/view?usp=sharing">
-    Acceder a mis recetas →
+  <h1 id="titulo">Pago confirmado!</h1>
+  <p class="sub" id="subtitulo">Gracias por tu compra. Tu acceso esta listo.</p>
+  <div class="aviso" id="aviso" style="display:none"></div>
+  <a class="btn" id="btn-acesso" href="https://drive.google.com/file/d/1xncYfL9BqytUgWWEpioNOHWW05jwyIX3/view?usp=sharing">
+    Acceder a mis recetas
   </a>
-  <p class="counter">Redirigiendo automáticamente...</p>
+  <p class="counter" id="counter"></p>
 </div>
+
+<script src="https://js.stripe.com/v3/"></script>
 <script>
-  var t = 5;
-  var el = document.getElementById('s');
-  var iv = setInterval(function() {
-    t--;
-    el.textContent = t;
-    if (t <= 0) {
-      clearInterval(iv);
-      window.location.href = 'https://drive.google.com/file/d/1xncYfL9BqytUgWWEpioNOHWW05jwyIX3/view?usp=sharing';
-    }
-  }, 1000);
+  var stripe = Stripe('pk_live_51R1FcqKxg0oNxUzzsosBDovpAYLPsgY2z11YjmyhlZjhXO4QAV4tjvsQS5PxhAovserkUCJy26Zcr2wpesVXNVnJ00FCft7Dmp');
+  var params = new URLSearchParams(window.location.search);
+  var piSecret = params.get('payment_intent_client_secret');
+  var redirectStatus = params.get('redirect_status');
+
+  if (piSecret) {
+    stripe.retrievePaymentIntent(piSecret).then(function(result) {
+      var intent = result.paymentIntent;
+      var aviso = document.getElementById('aviso');
+      var titulo = document.getElementById('titulo');
+      var subtitulo = document.getElementById('subtitulo');
+      var btn = document.getElementById('btn-acesso');
+      var counter = document.getElementById('counter');
+
+      if (intent.status === 'succeeded') {
+        // Pagamento confirmado - redireciona
+        var t = 4;
+        counter.textContent = 'Redirigiendo en ' + t + ' segundos...';
+        var iv = setInterval(function() {
+          t--;
+          counter.textContent = 'Redirigiendo en ' + t + ' segundos...';
+          if (t <= 0) { clearInterval(iv); window.location.href = btn.href; }
+        }, 1000);
+
+      } else if (intent.status === 'requires_action' || intent.status === 'processing') {
+        // OXXO ou SPEI — pagamento pendente
+        titulo.textContent = 'Ya casi!';
+        subtitulo.textContent = 'Tu pedido fue registrado. Completa tu pago para recibir el acceso.';
+        aviso.style.display = 'block';
+        if (intent.payment_method_types && intent.payment_method_types.includes('oxxo')) {
+          aviso.textContent = 'Ve a cualquier tienda OXXO y realiza el pago con el voucher que Stripe te envio por correo. En cuanto pagues, recibes tu acceso automaticamente.';
+        } else {
+          aviso.textContent = 'Realiza tu transferencia SPEI con los datos que Stripe te envio por correo. El acceso se libera automaticamente al confirmar.';
+        }
+        btn.style.display = 'none';
+      }
+    });
+  } else {
+    // Veio direto do checkout JS (cartao/Apple Pay) - redireciona logo
+    var t = 4;
+    var counter = document.getElementById('counter');
+    counter.textContent = 'Redirigiendo en ' + t + ' segundos...';
+    var iv = setInterval(function() {
+      t--;
+      counter.textContent = 'Redirigiendo en ' + t + ' segundos...';
+      if (t <= 0) { clearInterval(iv); window.location.href = 'https://drive.google.com/file/d/1xncYfL9BqytUgWWEpioNOHWW05jwyIX3/view?usp=sharing'; }
+    }, 1000);
+  }
 </script>
 </body>
 </html>
