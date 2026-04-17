@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>¡Pago confirmado! — Rellenos Secretos</title>
+<script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '904108975631664');
+  fbq('track', 'PageView');
+  fbq('track', 'Purchase', {
+    value: 88,
+    currency: 'MXN',
+    content_ids: ['rellenos-mx'],
+    content_type: 'product'
+  });
+</script>
+<noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=904108975631664&ev=Purchase&noscript=1"
+/></noscript>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet"/>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(160deg, #fde8ee, #fff5e6);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 48px 32px;
+    max-width: 400px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+  }
+  .icon { font-size: 64px; margin-bottom: 16px; }
+  h1 { font-size: 28px; font-weight: 900; color: #2a1a0e; margin-bottom: 8px; }
+  p { font-size: 15px; color: #7a5c45; font-weight: 600; margin-bottom: 24px; line-height: 1.6; }
+  .btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #e8849a, #c9504d);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 800;
+    padding: 16px 32px;
+    border-radius: 50px;
+    text-decoration: none;
+    box-shadow: 0 6px 20px rgba(200,80,77,0.35);
+  }
+  .counter { font-size: 13px; color: #b09080; margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="icon">🎉</div>
+  <h1>¡Pago confirmado!</h1>
+  <p>Gracias por tu compra.<br/>Serás redirigido a tus recetas en <span id="s">5</span> segundos.</p>
+  <a class="btn" href="https://drive.google.com/file/d/1xncYfL9BqytUgWWEpioNOHWW05jwyIX3/view?usp=sharing">
+    Acceder a mis recetas →
+  </a>
+  <p class="counter">Redirigiendo automáticamente...</p>
+</div>
+<script>
+  var t = 5;
+  var el = document.getElementById('s');
+  var iv = setInterval(function() {
+    t--;
+    el.textContent = t;
+    if (t <= 0) {
+      clearInterval(iv);
+      window.location.href = 'https://drive.google.com/file/d/1xncYfL9BqytUgWWEpioNOHWW05jwyIX3/view?usp=sharing';
+    }
+  }, 1000);
+</script>
+</body>
+</html>
