@@ -34,7 +34,10 @@
   input[type=text],input[type=email]{width:100%;border:1.5px solid #f0d0d8;border-radius:12px;padding:12px 14px;font-size:14px;font-family:'Nunito',sans-serif;outline:none;transition:border .2s}
   input:focus{border-color:var(--rosa)}
   .field{margin-bottom:16px}
+  #express-checkout-element{margin-bottom:4px}
   #payment-element{margin-bottom:16px}
+  .divider{display:flex;align-items:center;gap:10px;margin:16px 0;font-size:12px;color:#b09080;font-weight:700}
+  .divider::before,.divider::after{content:'';flex:1;height:1px;background:#f0d0d8}
   .btn-pagar{width:100%;background:linear-gradient(135deg,#e8849a,#c9504d);color:#fff;font-size:16px;font-weight:900;padding:16px;border:none;border-radius:14px;cursor:pointer;box-shadow:0 6px 20px rgba(200,80,77,0.35);transition:opacity .15s;display:flex;align-items:center;justify-content:center;gap:8px}
   .btn-pagar:disabled{opacity:.6;cursor:not-allowed}
   .erro{color:#c9504d;font-size:13px;font-weight:700;margin-top:10px;text-align:center}
@@ -75,6 +78,8 @@
         <label>Correo electronico</label>
         <input type="email" id="email" placeholder="tucorreo@email.com"/>
       </div>
+      <div id="express-checkout-element"></div>
+      <div id="divider-express" class="divider" style="display:none">O paga con tarjeta</div>
       <label>Datos de pago</label>
       <div id="payment-element"></div>
       <div id="erro" class="erro"></div>
@@ -99,6 +104,13 @@
 var stripe = Stripe('pk_live_51R1FcqKxg0oNxUzzsosBDovpAYLPsgY2z11YjmyhlZjhXO4QAV4tjvsQS5PxhAovserkUCJy26Zcr2wpesVXNVnJ00FCft7Dmp');
 var elements, paymentElement, clientSecret;
 
+function onSuccess() {
+  if (window.fbq) fbq('track','Purchase',{value:88,currency:'MXN',content_ids:['rellenos-mx'],content_type:'product'});
+  document.getElementById('form-section').style.display = 'none';
+  document.getElementById('sucesso').style.display = 'block';
+  setTimeout(function(){ window.location.href = 'https://drive.google.com/file/d/1xncYfL9BqytUgWWEpioNOHWW05jwyIX3/view?usp=sharing'; }, 4000);
+}
+
 async function init() {
   var nome = document.getElementById('nome').value;
   var email = document.getElementById('email').value;
@@ -111,7 +123,32 @@ async function init() {
   if (data.error) { document.getElementById('erro').textContent = data.error; return false; }
   clientSecret = data.clientSecret;
   elements = stripe.elements({clientSecret: clientSecret, locale: 'es-419'});
-  paymentElement = elements.create('payment', {defaultValues: {billingDetails: {address: {country: 'MX'}}}});
+  // Express Checkout (Apple Pay / Google Pay)
+  var expressEl = elements.create('expressCheckout', {
+    buttonHeight: 48,
+    paymentMethods: {applePay: 'always', googlePay: 'always'}
+  });
+  expressEl.mount('#express-checkout-element');
+  expressEl.on('ready', function(e) {
+    var m = e.availablePaymentMethods;
+    if (m && (m.applePay || m.googlePay)) {
+      document.getElementById('divider-express').style.display = 'flex';
+    }
+  });
+  expressEl.on('confirm', async function() {
+    var r = await stripe.confirmPayment({
+      elements: elements, redirect: 'if_required',
+      confirmParams: {return_url: 'https://recheios-spanish.vercel.app/obrigado.html'}
+    });
+    if (r.error) document.getElementById('erro').textContent = r.error.message;
+    else onSuccess();
+  });
+
+  // Payment Element (cartão) — sem Apple/Google Pay duplicado
+  paymentElement = elements.create('payment', {
+    defaultValues: {billingDetails: {address: {country: 'MX'}}},
+    wallets: {applePay: 'never', googlePay: 'never'}
+  });
   paymentElement.mount('#payment-element');
   return true;
 }
@@ -151,14 +188,7 @@ async function pagar() {
     erroEl.textContent = result.error.message;
     btn.disabled = false;
     btn.innerHTML = 'Pagar $88 MXN';
-  } else {
-    if (window.fbq) fbq('track', 'Purchase', {value:88, currency:'MXN', content_ids:['rellenos-mx'], content_type:'product'});
-    document.getElementById('form-section').style.display = 'none';
-    document.getElementById('sucesso').style.display = 'block';
-    setTimeout(function() {
-      window.location.href = 'https://drive.google.com/file/d/1xncYfL9BqytUgWWEpioNOHWW05jwyIX3/view?usp=sharing';
-    }, 4000);
-  }
+  } else { onSuccess(); }
 }
 </script>
 </body>
