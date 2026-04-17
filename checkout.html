@@ -111,7 +111,7 @@ async function init() {
   if (data.error) { document.getElementById('erro').textContent = data.error; return false; }
   clientSecret = data.clientSecret;
   elements = stripe.elements({clientSecret: clientSecret, locale: 'es-419'});
-  paymentElement = elements.create('payment');
+  paymentElement = elements.create('payment', {defaultValues: {billingDetails: {address: {country: 'MX'}}}});
   paymentElement.mount('#payment-element');
   return true;
 }
