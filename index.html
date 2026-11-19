@@ -27,7 +27,7 @@ h1{font:900 clamp(38px,7vw,58px)/1.06 'Playfair Display',serif;letter-spacing:-.
 video{display:block;width:100%;aspect-ratio:16/9;object-fit:contain;background:#211916;border-radius:15px}
 .video-caption{color:#fff;font-size:11px;text-align:center;padding:8px 4px 1px;opacity:.85}
 .plans{display:none;padding:48px 0 42px;background:linear-gradient(180deg,#fff3f5,#fffaf7)}
-.plans.visible{display:block;animation:show .55s ease both}@keyframes show{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.plans.visible{display:block;animation:show .55s ease both}.after-video{display:none}.after-video.visible{display:block;animation:show .55s ease both}@keyframes show{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 .section-title{text-align:center;margin:0 auto 25px}.section-title h2{font:800 30px 'Playfair Display',serif;margin:0 0 7px}.section-title p{margin:0;color:var(--muted);font-size:14px}
 .plan-grid{display:grid;grid-template-columns:1fr 1.12fr;gap:17px;align-items:stretch}
 .plan{position:relative;background:#fff;border:1px solid var(--line);border-radius:20px;padding:24px 21px;box-shadow:var(--shadow);display:flex;flex-direction:column}
@@ -103,6 +103,7 @@ footer{text-align:center;padding:26px 15px 32px;color:#8c7770;font-size:12px}foo
  </div>
 </section>
 
+<div class="after-video" id="after-video">
 <section class="guarantee">
  <div class="wrap">
   <h2>Fique tranquilo, te damos garantia de 14 dias sobre sua compra.</h2>
@@ -141,13 +142,16 @@ footer{text-align:center;padding:26px 15px 32px;color:#8c7770;font-size:12px}foo
  <p class="ref">— Hebreus 13:8</p>
  <div class="copyright">© 2026 KF EMPREENDIMENTOS DIGITAIS. Todos os direitos reservados.</div>
 </footer>
+</div>
 
 <script>
 const video = document.getElementById('vsl');
 const plans = document.getElementById('planos');
+const afterVideo = document.getElementById('after-video');
 function showPlans(){
  if(plans.classList.contains('visible')) return;
  plans.classList.add('visible');
+ afterVideo.classList.add('visible');
 }
 video.addEventListener('ended', showPlans);
 // Caso o visitante avance manualmente pelo vídeo, os planos aparecem ao chegar ao final.
