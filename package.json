@@ -2,6 +2,7 @@
   "name": "rellenos-secretos",
   "version": "1.0.0",
   "dependencies": {
+    "@vercel/blob": "^1.1.1",
     "stripe": "^14.0.0"
   }
 }
