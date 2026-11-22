@@ -176,27 +176,49 @@ video.addEventListener('timeupdate', () => {
   <div id="upload-audio-status" style="font-size:13px;margin:8px 0;overflow-wrap:anywhere"></div>
  </details>
 </section>
-<script type="module">
-import { upload } from 'https://esm.sh/@vercel/blob@1.1.1/client';
+<script>
 async function enviarMidia(tipo){
- const video=tipo==='video', file=document.getElementById(video?'upload-video-temp':'upload-audio-temp').files[0];
- const status=document.getElementById(video?'upload-video-status':'upload-audio-status');
- const btn=document.getElementById(video?'upload-video-btn':'upload-audio-btn');
+ const isVideo=tipo==='video';
+ const file=document.getElementById(isVideo?'upload-video-temp':'upload-audio-temp').files[0];
+ const status=document.getElementById(isVideo?'upload-video-status':'upload-audio-status');
+ const btn=document.getElementById(isVideo?'upload-video-btn':'upload-audio-btn');
  const password=document.getElementById('upload-password-temp').value;
  if(!password){status.textContent='Digite a senha de acesso.';return}
  if(!file){status.textContent='Selecione um arquivo primeiro.';return}
- btn.disabled=true;status.textContent='Preparando envio...';
+ if(file.size>50*1024*1024){status.textContent='O arquivo ultrapassa o limite de 50 MB do bucket.';return}
+ btn.disabled=true;status.textContent='Preparando envio seguro...';
  try{
-  const ext=(file.name.split('.').pop()||(video?'mp4':'mp3')).toLowerCase().replace(/[^a-z0-9]/g,'');
-  const blob=await upload('media/'+tipo+'.'+ext,file,{
-   access:'public',handleUploadUrl:'/api/upload',
-   clientPayload:JSON.stringify({password,kind:tipo}),
-   multipart:file.size>100*1024*1024,
-   onUploadProgress(p){status.textContent='Enviando: '+Math.round(p.percentage)+'%'}
+  const authResponse=await fetch('/api/upload',{
+   method:'POST',
+   headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({password,kind:tipo,filename:file.name,contentType:file.type})
   });
-  status.innerHTML='Concluído! <a href="'+blob.url+'" target="_blank" rel="noopener" style="color:#a12e69">Abrir arquivo enviado</a> · <button type="button" style="border:0;background:none;color:#a12e69;text-decoration:underline;cursor:pointer">Copiar link</button>';
-  status.querySelector('button').addEventListener('click',()=>navigator.clipboard.writeText(blob.url).then(()=>status.querySelector('button').textContent='Link copiado!'));
- }catch(e){status.textContent='Falha no envio: '+(e.message||'erro desconhecido')+'. Verifique a configuração do Blob e a senha.'}
+  const authorization=await authResponse.json();
+  if(!authResponse.ok) throw new Error(authorization.error||'Não foi possível autorizar o envio.');
+  status.textContent='Enviando para o Supabase...';
+  const uploadResponse=await fetch(authorization.signedUrl,{
+   method:'PUT',
+   headers:{'Content-Type':authorization.contentType},
+   body:file
+  });
+  if(!uploadResponse.ok){
+   const detail=await uploadResponse.text();
+   throw new Error('Supabase recusou o arquivo ('+uploadResponse.status+'). '+detail.slice(0,180));
+  }
+  status.textContent='';
+  const link=document.createElement('a');
+  link.href=authorization.publicUrl;link.target='_blank';link.rel='noopener';
+  link.textContent='Abrir arquivo enviado';
+  link.style.cssText='color:#a12e69;font-weight:700';
+  const copy=document.createElement('button');
+  copy.type='button';copy.textContent='Copiar link';
+  copy.style.cssText='border:0;background:none;color:#a12e69;text-decoration:underline;cursor:pointer;margin-left:8px';
+  copy.addEventListener('click',async()=>{
+   try{await navigator.clipboard.writeText(authorization.publicUrl);copy.textContent='Link copiado!'}
+   catch(_){copy.textContent='Não foi possível copiar'}
+  });
+  status.append('Concluído! ',link,' · ',copy);
+ }catch(e){status.textContent='Falha no envio: '+(e.message||'erro desconhecido')}
  finally{btn.disabled=false}
 }
 document.getElementById('upload-video-btn').addEventListener('click',()=>enviarMidia('video'));
