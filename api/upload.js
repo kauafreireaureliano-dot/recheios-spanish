@@ -1,66 +1,72 @@
-const { handleUpload } = require('@vercel/blob/client');
+const { createClient } = require('@supabase/supabase-js');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: 'Método não permitido.' });
   }
 
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    return res.status(500).json({
-      error: 'BLOB_READ_WRITE_TOKEN ausente. Conecte um Vercel Blob Store a este projeto e ao ambiente Production.'
-    });
-  }
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY;
+  const uploadPassword = process.env.UPLOAD_PASSWORD;
 
-  if (!process.env.UPLOAD_PASSWORD) {
+  if (!supabaseUrl || !supabaseSecretKey || !uploadPassword) {
     return res.status(500).json({
-      error: 'UPLOAD_PASSWORD ausente. Cadastre essa variável nas configurações da Vercel.'
+      error: 'Configuração incompleta. Confira SUPABASE_URL, SUPABASE_SECRET_KEY e UPLOAD_PASSWORD na Vercel.'
     });
   }
 
   try {
-    // A Vercel já entrega req.body processado pelo body parser padrão.
-    // handleUpload deve receber o IncomingMessage original para preservar
-    // os dados da requisição usados na geração do token.
-    const body = req.body;
+    const body = req.body || {};
+    if (body.password !== uploadPassword) {
+      return res.status(401).json({ error: 'Senha incorreta.' });
+    }
 
-    const result = await handleUpload({
-      body,
-      request: req,
-      onBeforeGenerateToken: async (pathname, clientPayload) => {
-        let payload = {};
-        try {
-          payload = JSON.parse(clientPayload || '{}');
-        } catch (_) {
-          throw new Error('Dados de autorização inválidos.');
-        }
+    const kind = body.kind;
+    const isVideo = kind === 'video';
+    if (!isVideo && kind !== 'audio') {
+      return res.status(400).json({ error: 'Tipo de arquivo inválido.' });
+    }
 
-        if (payload.password !== process.env.UPLOAD_PASSWORD) {
-          throw new Error('Senha incorreta.');
-        }
+    const originalName = String(body.filename || '');
+    const extension = (originalName.split('.').pop() || '').toLowerCase();
+    const allowed = isVideo
+      ? { mp4: 'video/mp4', mov: 'video/quicktime', webm: 'video/webm' }
+      : { mp3: 'audio/mpeg', m4a: 'audio/mp4', wav: 'audio/wav' };
 
-        const isVideo = payload.kind === 'video';
-        if (!isVideo && payload.kind !== 'audio') {
-          throw new Error('Tipo de arquivo inválido.');
-        }
+    const contentType = allowed[extension];
+    if (!contentType) {
+      return res.status(400).json({ error: 'Formato não permitido.' });
+    }
 
-        return {
-          allowedContentTypes: isVideo
-            ? ['video/mp4', 'video/quicktime', 'video/webm']
-            : ['audio/mpeg', 'audio/mp4', 'audio/wav', 'audio/x-wav'],
-          addRandomSuffix: false,
-          allowOverwrite: true,
-          maximumSizeInBytes: isVideo
-            ? 2 * 1024 * 1024 * 1024
-            : 100 * 1024 * 1024
-        };
-      }
+    const requestedType = String(body.contentType || '').toLowerCase();
+    if (requestedType && requestedType !== contentType &&
+        !(extension === 'wav' && requestedType === 'audio/x-wav')) {
+      return res.status(400).json({ error: 'O tipo do arquivo não corresponde à extensão.' });
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseSecretKey, {
+      auth: { persistSession: false, autoRefreshToken: false }
     });
 
-    return res.status(200).json(result);
+    const safeName = kind + '-' + Date.now() + '.' + extension;
+    const path = 'uploads/' + safeName;
+    const { data, error } = await supabase.storage
+      .from('midias')
+      .createSignedUploadUrl(path);
+
+    if (error) {
+      console.error('Supabase signed upload error:', error);
+      return res.status(502).json({ error: 'Não foi possível gerar a autorização no Supabase.' });
+    }
+
+    return res.status(200).json({
+      signedUrl: data.signedUrl,
+      path,
+      contentType,
+      publicUrl: supabase.storage.from('midias').getPublicUrl(path).data.publicUrl
+    });
   } catch (error) {
-    console.error('Vercel Blob upload token error:', error);
-    return res.status(400).json({
-      error: error.message || 'Falha ao gerar autorização de upload.'
-    });
+    console.error('Upload authorization error:', error);
+    return res.status(500).json({ error: 'Falha interna ao preparar o envio.' });
   }
 };
