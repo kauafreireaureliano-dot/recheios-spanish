@@ -153,77 +153,12 @@ function showPlans(){
  plans.classList.add('visible');
  afterVideo.classList.add('visible');
 }
-video.addEventListener('ended', showPlans);
-// Caso o visitante avance manualmente pelo vídeo, os planos aparecem ao chegar ao final.
+// Revela o restante da página após 7 segundos efetivamente reproduzidos.
 video.addEventListener('timeupdate', () => {
- if(video.duration && video.currentTime >= video.duration - 0.25) showPlans();
+ if(video.currentTime >= 7) showPlans();
 });
 </script>
 
-<!-- ÁREA TEMPORÁRIA DE UPLOAD: remover após o envio dos arquivos -->
-<section id="area-upload-temporaria" style="max-width:850px;margin:35px auto;padding:0 17px 35px">
- <details style="background:#fff;border:1px dashed #d9a0b5;border-radius:16px;padding:18px">
-  <summary style="cursor:pointer;font-weight:800;color:#9f496c">Área temporária de envio de vídeo e áudio (administrador)</summary>
-  <p style="font-size:13px;color:#806c64">Use esta área para enviar os arquivos. Ela não altera o conteúdo da oferta.</p>
-  <label style="display:block;font-weight:700;margin:14px 0 6px" for="upload-password-temp">Senha de acesso</label>
-  <input id="upload-password-temp" type="password" autocomplete="current-password" placeholder="Senha de upload" style="width:100%;padding:12px;border:1px solid #e7cbd9;border-radius:10px">
-  <label style="display:block;font-weight:700;margin:14px 0 6px" for="upload-video-temp">Vídeo (MP4, MOV ou WebM)</label>
-  <input id="upload-video-temp" type="file" accept="video/mp4,video/quicktime,video/webm" style="width:100%">
-  <button id="upload-video-btn" type="button" style="width:100%;margin-top:10px;padding:13px;border:0;border-radius:10px;background:#c85d7b;color:white;font-weight:800;cursor:pointer">Enviar vídeo</button>
-  <div id="upload-video-status" style="font-size:13px;margin:8px 0 14px;overflow-wrap:anywhere"></div>
-  <label style="display:block;font-weight:700;margin:14px 0 6px" for="upload-audio-temp">Áudio (MP3, M4A ou WAV)</label>
-  <input id="upload-audio-temp" type="file" accept="audio/mpeg,audio/mp4,audio/wav,audio/x-wav" style="width:100%">
-  <button id="upload-audio-btn" type="button" style="width:100%;margin-top:10px;padding:13px;border:0;border-radius:10px;background:#594039;color:white;font-weight:800;cursor:pointer">Enviar áudio</button>
-  <div id="upload-audio-status" style="font-size:13px;margin:8px 0;overflow-wrap:anywhere"></div>
- </details>
-</section>
-<script>
-async function enviarMidia(tipo){
- const isVideo=tipo==='video';
- const file=document.getElementById(isVideo?'upload-video-temp':'upload-audio-temp').files[0];
- const status=document.getElementById(isVideo?'upload-video-status':'upload-audio-status');
- const btn=document.getElementById(isVideo?'upload-video-btn':'upload-audio-btn');
- const password=document.getElementById('upload-password-temp').value;
- if(!password){status.textContent='Digite a senha de acesso.';return}
- if(!file){status.textContent='Selecione um arquivo primeiro.';return}
- if(file.size>50*1024*1024){status.textContent='O arquivo ultrapassa o limite de 50 MB do bucket.';return}
- btn.disabled=true;status.textContent='Preparando envio seguro...';
- try{
-  const authResponse=await fetch('/api/upload',{
-   method:'POST',
-   headers:{'Content-Type':'application/json'},
-   body:JSON.stringify({password,kind:tipo,filename:file.name,contentType:file.type})
-  });
-  const authorization=await authResponse.json();
-  if(!authResponse.ok) throw new Error(authorization.error||'Não foi possível autorizar o envio.');
-  status.textContent='Enviando para o Supabase...';
-  const uploadResponse=await fetch(authorization.signedUrl,{
-   method:'PUT',
-   headers:{'Content-Type':authorization.contentType},
-   body:file
-  });
-  if(!uploadResponse.ok){
-   const detail=await uploadResponse.text();
-   throw new Error('Supabase recusou o arquivo ('+uploadResponse.status+'). '+detail.slice(0,180));
-  }
-  status.textContent='';
-  const link=document.createElement('a');
-  link.href=authorization.publicUrl;link.target='_blank';link.rel='noopener';
-  link.textContent='Abrir arquivo enviado';
-  link.style.cssText='color:#a12e69;font-weight:700';
-  const copy=document.createElement('button');
-  copy.type='button';copy.textContent='Copiar link';
-  copy.style.cssText='border:0;background:none;color:#a12e69;text-decoration:underline;cursor:pointer;margin-left:8px';
-  copy.addEventListener('click',async()=>{
-   try{await navigator.clipboard.writeText(authorization.publicUrl);copy.textContent='Link copiado!'}
-   catch(_){copy.textContent='Não foi possível copiar'}
-  });
-  status.append('Concluído! ',link,' · ',copy);
- }catch(e){status.textContent='Falha no envio: '+(e.message||'erro desconhecido')}
- finally{btn.disabled=false}
-}
-document.getElementById('upload-video-btn').addEventListener('click',()=>enviarMidia('video'));
-document.getElementById('upload-audio-btn').addEventListener('click',()=>enviarMidia('audio'));
-</script>
+
 </body>
 </html>
