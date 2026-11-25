@@ -153,13 +153,8 @@ function showPlans(){
  plans.classList.add('visible');
  afterVideo.classList.add('visible');
 }
-// Após a primeira rolagem da página, revela os cards em 3 segundos.
-let revealTimerStarted = false;
-window.addEventListener('scroll', () => {
- if(revealTimerStarted) return;
- revealTimerStarted = true;
- setTimeout(showPlans, 3000);
-}, { passive: true });
+// Revela os cards automaticamente 3 segundos após a entrada na página.
+setTimeout(showPlans, 3000);
 </script>
 
 
